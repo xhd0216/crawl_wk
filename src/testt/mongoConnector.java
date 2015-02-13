@@ -27,22 +27,17 @@ public class mongoConnector {
     private final DB db;
     private final DBCollection coll;
     public mongoConnector() throws UnknownHostException {
-        /*try{
-            client = new MongoClient("localhost", 27017);
-            db = client.getDB("myDB");
-            coll = db.getCollection("websites");
-        }
-        catch(UnknownHostException e){
-            throw e;
-        }*/
+        /*
+        this section won't cause any exception yet, exception will be thrown
+        when committing update to the database        
+        */
         client = new MongoClient("localhost", 27017);
         db = client.getDB("myDB");
         coll = db.getCollection("websites");
-        client.setWriteConcern(WriteConcern.ACKNOWLEDGED);
-        System.out.println("connected");
-        
+        client.setWriteConcern(WriteConcern.ACKNOWLEDGED);        
     }
     public void close() throws UnknownHostException{
+        /* the close method will also cause exception*/
         client.close();
     }
     public boolean writeToDB(String s, String u) throws UnknownHostException{
@@ -50,8 +45,11 @@ public class mongoConnector {
         doc.append("url", u);
         coll.insert(doc);
         return true;
-        
     }
+    public boolean writeToDB()throws UnknownHostException{
+        return true;
+    }
+    @Deprecated
     public void showOne() throws UnknownHostException{
         
         DBObject myDoc = coll.findOne();
