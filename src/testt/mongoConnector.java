@@ -46,7 +46,7 @@ public class mongoConnector {
         coll.insert(doc);
         return true;
     }
-    public boolean writeToDB()throws UnknownHostException{
+    public boolean writeToDB(PageNode p)throws UnknownHostException{
         return true;
     }
     @Deprecated

@@ -10,8 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import org.jsoup.Jsoup;
@@ -23,10 +22,79 @@ import org.jsoup.select.Elements;
  *
  * @author Zhizhou
  */
+class PageNode{
+    String UniqueID;
+    String title;
+    LinkedList<PageNode> outgoings; 
+    LinkedList<PageNode> incomings;
+    Boolean traversed;
+    public String getURL(){
+        return UniqueID;
+    }
+    public String getTitle(){
+        return title;
+    }
+    public boolean isChecked(){
+        return traversed;
+    }
+    @Deprecated
+    PageNode(String u, PageNode p){
+        outgoings  = new LinkedList();
+        incomings  = new LinkedList();
+        UniqueID = u;
+        traversed = false;
+        incomings.add(p);
+    }
+    PageNode(String u){
+        outgoings  = new LinkedList();
+        incomings  = new LinkedList();
+        UniqueID = u;
+        traversed = false;
+    }
+    public void insert(PageNode p, Boolean isOut){
+        if(isOut)
+            outgoings.add(p);
+        else
+            incomings.add(p);
+    }
+    public LinkedList<String> traverse(String BaseUrl){
+        Document doc;
+        Elements links;
+        LinkedList<String> result = new LinkedList();
+        try{
+            doc = Jsoup.connect(UniqueID).get();
+            links = doc.select("a");
+        }
+        catch(Exception e){
+            System.out.println("can not open page");
+            return result;
+        }
+        title = doc.title();
+        for(Element l : links){
+            /*
+            Extract forwarding links
+            if the link does not contain a title, it is not content in wiki
+            */
+            String cl = l.attr("class");
+            if(!cl.equals("mw-redirect")) continue;
+            String ref = l.attr("href");
+            //String outlink = l.attr("title");
+            if(ref.charAt(0) == '/'){
+                ref = BaseUrl + ref;
+            }
+            result.add(ref);
+            
+        }
+        traversed = true;
+        return result;
+    }
+    
+}
+
 //controllor
 class testCode{
-    private Queue<String> q = new LinkedList<String>();
-    private HashSet<String> hs = new HashSet<String> ();
+    private Queue<PageNode> q = new LinkedList<PageNode>();
+    private HashMap<String, PageNode> hm = new HashMap<> ();
     private Integer count = 0;
     private PrintWriter writer;
     private String BaseUrl;
@@ -42,8 +110,9 @@ class testCode{
         //root url
         BaseUrl = u;
         String url = u + "/wiki/" + fileName;
-        q.add(url);
-        hs.add(url);
+        PageNode pn = new PageNode(url);
+        q.add(pn);
+        hm.put(url, pn);
         try{
             writer = new PrintWriter(fileName+".txt", "UTF-8");
             writer.println(url);
@@ -58,78 +127,65 @@ class testCode{
             System.out.println("can not connect to database");
         }
     }
-    private boolean processURL(String page){
-        Document doc;
-        Elements links;
-        try{
-            doc = Jsoup.connect(page).get();
-            links = doc.select("a");
+    private boolean processURL(PageNode p){
+        Boolean result = false;
+        /* returns true if there are new links added, otherwise, return false*/
+        if(p == null || p.isChecked()){
+            return result;
         }
-        catch(Exception e){
-            System.out.println("can not open page");
-            return false;
-        }
-        for(Element l : links){
-            /*
-            Extract forwarding links
-            if the link does not contain a title, it is not content in wiki
-            */
-            String cl = l.attr("class");
-            if(!cl.equals("mw-redirect")) continue;
-            String ref = l.attr("href");
-            String outlink = l.attr("title");
-            if(ref.charAt(0) == '/'){
-                ref = BaseUrl + ref;
-            }
-            //writer.println(outlink);
+        LinkedList<String> ss = p.traverse(BaseUrl);
+        for(String s : ss){
             synchronized(this){
-                if(hs.contains(ref)){
-                    continue;
+                if(!hm.containsKey(s)){
+                    PageNode n = new PageNode(s);
+                    hm.put(s, n);
+                    q.add(n);
+                    result = true;
                 }
-                else{
-                    hs.add(ref);
-                    q.add(ref);
-                    writer.println(outlink);
-                }
+                hm.get(s).insert(p, false);
             }
+            p.insert(hm.get(s), true);
         }
-        return true;
+        return result;
     }
     public void calc(String t) throws InterruptedException{
 	while(count < 200){
-            String temp  = "*";
+            PageNode temp = null;
 	    synchronized (this){
+                if(q.isEmpty()){
+                    if(!shouldRun){
+                        notify();
+                        break;
+                    }
+                    else{
+                        wait();
+                    }
+                }
 		if(!q.isEmpty()){
 		    temp = q.remove();
 		    count++;
 		    notify();
 		}
-		else{
-                    if(!shouldRun){
-                        notify();
-                        break;
-                    }
-                    else wait();
-		}
 	    }
-            if(temp.length()> 1){
-                System.out.println("count "+count + " " + t+ " works on " + temp);
+            if(temp != null){
+                System.out.println("count "+count + " " + t+ " works on " + temp.getURL());
                 boolean b = processURL(temp);
                 synchronized(this){
                     if(!b && q.isEmpty()){
                         shouldRun = false;
-                        System.out.println("no more page in the pool");
+                        System.out.println("no more pages in the pool");
                         notify();
                         break;
                     }
                 }
             }
 	}
-        close();
+        //close();
     }
     public void close(){
-        writer.close();
+        
         try{
+            writer.close();
             conn.close();
         }
         catch(Exception e){
