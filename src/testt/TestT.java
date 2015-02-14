@@ -34,22 +34,25 @@ public class TestT {
         testCode PD = new testCode(url, fileName);
         
 	int nThreads = 4;
-        ArrayList<ThreadDemo> ths = new ArrayList<ThreadDemo>();
+        ArrayList<ThreadDemo> ths = new ArrayList<>();
         
         for(int i = 1; i <= nThreads; i++){
             ThreadDemo t = new ThreadDemo("Thread - "+i, PD);
             ths.add(t);
             t.start();
+            
         }
 	// wait for threads to end
 	try {
             for(ThreadDemo j : ths){
                 j.join();
+                System.out.println("Thread ended");
             }
-	} catch( Exception e) {
+        } catch( Exception e) {
 	    System.out.println("Interrupted");
 	}
-        PD.close();
+        //PD.close();
+        System.out.println("****all over!****");
         
     }
 }

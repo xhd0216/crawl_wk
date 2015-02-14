@@ -19,18 +19,20 @@ class ThreadDemo extends Thread {
 	threadName = name;
 	PD = pd;
     }
+    @Override
     public void run() {
-	//System.out.println("Thread " +  threadName + "is working.");
 	try{
 	    PD.calc(threadName);
+            
 	}catch (InterruptedException e){
 	    System.out.println("Oops...");
 	}
     }
     
+    @Override
     public void start ()
     {
-	System.out.println("Starting " +  threadName );
+	//System.out.println("Starting " +  threadName );
 	if (t == null)
 	    {
 		t = new Thread (this, threadName);

@@ -23,15 +23,15 @@ import com.mongodb.WriteConcern;
 import java.net.UnknownHostException;
 
 public class mongoConnector {
-    private final MongoClient client;
-    private final DB db;
-    private final DBCollection coll;
+    private  MongoClient client;
+    private  DB db;
+    private  DBCollection coll;
     public mongoConnector() throws UnknownHostException {
         /*
         this section won't cause any exception yet, exception will be thrown
         when committing update to the database        
         */
-        client = new MongoClient("localhost", 27017);
+        client = new MongoClient();
         db = client.getDB("myDB");
         coll = db.getCollection("websites");
         client.setWriteConcern(WriteConcern.ACKNOWLEDGED);        
@@ -40,14 +40,46 @@ public class mongoConnector {
         /* the close method will also cause exception*/
         client.close();
     }
-    public boolean writeToDB(String s, String u) throws UnknownHostException{
-        BasicDBObject doc = new BasicDBObject("title", s);
+    public void writeToDB(String t, String u) throws UnknownHostException{
+        BasicDBObject doc = new BasicDBObject("title", t);
         doc.append("url", u);
         coll.insert(doc);
-        return true;
     }
-    public boolean writeToDB(PageNode p)throws UnknownHostException{
+    public boolean writeToDB(PageNode p){
+        try{
+            BasicDBObject doc = new BasicDBObject("url", p.getURL());
+            /*DBCursor cursor = coll.find(doc);
+            if(cursor.count() > 0){
+                while(cursor.hasNext()){
+                    cursor.remove();
+                    cursor.next();
+                }
+            }
+            System.out.println("no deplicates now");*/
+            if(p.isChecked()) doc.append("title", p.getTitle());
+            BasicDBObject out = new BasicDBObject();
+            for(PageNode t : p.getOut()){
+                if(t.isChecked()){
+                    out.append("out",t.getTitle());
+                }
+            }
+            for(PageNode t : p.getIn()){
+                if(t.isChecked()){
+                    out.append("in", t.getTitle());
+                }
+            }
+            if(!out.isEmpty()){
+                doc.append("friends", out);
+            }
+        
+            coll.insert(doc);
+        }
+        catch(Exception e){
+            System.out.println("--cannot connect to host--");
+            return false;
+        }
         return true;
+        
     }
     @Deprecated
     public void showOne() throws UnknownHostException{

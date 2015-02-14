@@ -37,6 +37,12 @@ class PageNode{
     public boolean isChecked(){
         return traversed;
     }
+    public LinkedList<PageNode> getOut(){
+        return outgoings;
+    }
+    public LinkedList<PageNode> getIn(){
+        return incomings;
+    }
     @Deprecated
     PageNode(String u, PageNode p){
         outgoings  = new LinkedList();
@@ -122,6 +128,7 @@ class testCode{
         }
         try{
             conn = new mongoConnector();
+            
         }
         catch (UnknownHostException e2){
             System.out.println("can not connect to database");
@@ -149,7 +156,7 @@ class testCode{
         return result;
     }
     public void calc(String t) throws InterruptedException{
-	while(count < 200){
+	while(count < 20){
             PageNode temp = null;
 	    synchronized (this){
                 if(q.isEmpty()){
@@ -161,7 +168,7 @@ class testCode{
                         wait();
                     }
                 }
-		if(!q.isEmpty()){
+                else if(!q.isEmpty()){
 		    temp = q.remove();
 		    count++;
 		    notify();
@@ -181,12 +188,14 @@ class testCode{
             }
 	}
         //close();
+        //System.out.println("Thread really ends");
     }
     public void close(){
         
         try{
             writer.close();
             conn.close();
+            System.out.println("closed");
         }
         catch(Exception e){
             //do nothing;
