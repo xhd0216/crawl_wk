@@ -1,8 +1,8 @@
 package testt;
+import java.io.IOException;
 import java.util.LinkedList;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /*
@@ -67,26 +67,23 @@ public class PageNode{
             doc = Jsoup.connect(UniqueID).get();
             links = doc.select("a");
         }
-        catch(Exception e){
+        catch(IOException e){
             System.out.println("can not open page");
             return result;
         }
         title = doc.title();
-        for(Element l : links){
-            /*
-            Extract forwarding links
-            if the link does not contain a title, it is not content in wiki
-            */
+        title = title.split(" - ")[0];
+        links.stream().forEach((l) -> {
             String cl = l.attr("class");
-            if(!cl.equals("mw-redirect")) continue;
-            String ref = l.attr("href");
-            //String outlink = l.attr("title");
-            if(ref.charAt(0) == '/'){
-                ref = BaseUrl + ref;
+            if (!(!cl.equals("mw-redirect"))) {
+                String ref = l.attr("href");
+                //String outlink = l.attr("title");
+                if(ref.charAt(0) == '/'){
+                    ref = BaseUrl + ref;
+                }
+                result.add(ref);
             }
-            result.add(ref);
-            
-        }
+        });
         traversed = true;
         return result;
     }

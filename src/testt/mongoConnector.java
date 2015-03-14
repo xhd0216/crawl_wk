@@ -10,28 +10,35 @@
  */
 package testt;
 import com.mongodb.BasicDBObject;
-import com.mongodb.BulkWriteOperation;
-import com.mongodb.BulkWriteResult;
-import com.mongodb.Cursor;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import com.mongodb.ParallelScanOptions;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
 import java.net.UnknownHostException;
-
+import java.util.Arrays;
+import java.util.Scanner;
 public class mongoConnector {
     private  MongoClient client;
     private  DB db;
     private  DBCollection coll;
     public mongoConnector() throws UnknownHostException {
         /*
-        this section won't cause any exception yet, exception will be thrown
-        when committing update to the database        
+        *  this section won't cause any exception yet, exception will be thrown
+        *  when committing update to the database        
         */
-        client = new MongoClient();
+        Scanner sc = new Scanner(System.in);
+        String pwd;
+        System.out.print("password:");
+        pwd = sc.next();
+        
+        /*char [] pwd;
+        pwd = System.console().readPassword();*/
+        MongoCredential mc = MongoCredential.createCredential("rwmy", "myDB", pwd.toCharArray());
+        ServerAddress sa = new ServerAddress("localhost");
+        client = new MongoClient(sa, Arrays.asList(mc));
         db = client.getDB("myDB");
         coll = db.getCollection("websites");
         client.setWriteConcern(WriteConcern.ACKNOWLEDGED);        
@@ -48,14 +55,6 @@ public class mongoConnector {
     public boolean writeToDB(PageNode p){
         try{
             BasicDBObject doc = new BasicDBObject("url", p.getURL());
-            /*DBCursor cursor = coll.find(doc);
-            if(cursor.count() > 0){
-                while(cursor.hasNext()){
-                    cursor.remove();
-                    cursor.next();
-                }
-            }
-            System.out.println("no deplicates now");*/
             if(p.isChecked()) doc.append("title", p.getTitle());
             BasicDBObject out = new BasicDBObject();
             for(PageNode t : p.getOut()){

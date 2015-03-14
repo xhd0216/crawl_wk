@@ -20,23 +20,28 @@ import java.util.Queue;
 
 //controllor
 class testCode{
-    private Queue<PageNode> q = new LinkedList<PageNode>();
-    private HashMap<String, PageNode> hm = new HashMap<> ();
+    private final Queue<PageNode> q; //= new LinkedList<PageNode>();
+    /* page title to pagenode map */
+    private final HashMap<String, PageNode> hm; //= new HashMap<> ();
+    /* pagenode to its _id in database */
+    private final HashMap<PageNode, String> ptd;// = new HashMap<> ();
     private Integer count = 0;
     //private PrintWriter writer;
-    private String BaseUrl;
+    private final String BaseUrl;
     private boolean shouldRun;
     private mongoConnector conn;
-    /*@Deprecated
-    public void checkDB() throws UnknownHostException{
-        conn.showOne();
-    }*/
+    private int depth;
+
     testCode(String u, String fileName) throws UnsupportedEncodingException, UnknownHostException{
         //set to false when the queue is empty and no more new links is coming
         shouldRun = true;
         //root url
         BaseUrl = u;
+        depth = 5;
         String url = u + "/wiki/" + fileName;
+        q = new LinkedList<>();
+        hm = new HashMap<> ();
+        ptd = new HashMap<> ();
         PageNode pn = new PageNode(url);
         q.add(pn);
         hm.put(url, pn);
@@ -90,11 +95,9 @@ class testCode{
                         wait();
                     }
                 }
-                //else if(!q.isEmpty()){
-		    temp = q.remove();
-		    count++;
-		    notify();
-		//}
+		temp = q.remove();
+		count++;
+		notify();
 	    }
             if(temp != null){
                 System.out.println("count "+count + " " + t+ " works on " + temp.getURL());
