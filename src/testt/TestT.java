@@ -30,14 +30,14 @@ public class TestT {
      */
     public static void main(String args[]) throws UnsupportedEncodingException, UnknownHostException {
         String url = "http://en.wikipedia.org";
-        String fileName = "Oregon";
+        String fileName = "Ohio";
         testCode PD = new testCode(url, fileName);
         
 	int nThreads = 4;
         ArrayList<ThreadDemo> ths = new ArrayList<>();
         
         for(int i = 1; i <= nThreads; i++){
-            ThreadDemo t = new ThreadDemo("Thread - "+i, PD);
+            ThreadDemo t = new ThreadDemo("Thread-"+i, PD);
             ths.add(t);
             t.start();
             
@@ -46,7 +46,7 @@ public class TestT {
 	try {
             for(ThreadDemo j : ths){
                 j.join();
-                System.out.println("Thread ended");
+                System.out.println(j.getName()+" ended");
             }
         } catch( Exception e) {
 	    System.out.println("Interrupted");

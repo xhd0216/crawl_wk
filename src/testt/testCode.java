@@ -159,7 +159,7 @@ class testCode{
 	while(count < 20){
             PageNode temp = null;
 	    synchronized (this){
-                if(q.isEmpty()){
+                while(q.isEmpty()){
                     if(!shouldRun){
                         notify();
                         break;
@@ -168,11 +168,11 @@ class testCode{
                         wait();
                     }
                 }
-                else if(!q.isEmpty()){
+                //else if(!q.isEmpty()){
 		    temp = q.remove();
 		    count++;
 		    notify();
-		}
+		//}
 	    }
             if(temp != null){
                 System.out.println("count "+count + " " + t+ " works on " + temp.getURL());
@@ -189,6 +189,7 @@ class testCode{
 	}
         //close();
         //System.out.println("Thread really ends");
+        return;
     }
     public void close(){
         
@@ -200,6 +201,7 @@ class testCode{
         catch(Exception e){
             //do nothing;
         }
+        
     }
 
 }
