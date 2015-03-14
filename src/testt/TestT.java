@@ -33,7 +33,7 @@ public class TestT {
         String url = "http://en.wikipedia.org";
         String fileName = "Ohio";
         testCode PD = new testCode(url, fileName);
-        
+        boolean allFinished = false;
 	int nThreads = 4;
         ArrayList<ThreadDemo> ths = new ArrayList<>();
         
@@ -45,7 +45,7 @@ public class TestT {
         }
 	// wait for threads to end
 	try {
-            sleep(3000);
+            sleep(10000);
             for(ThreadDemo j : ths){
                 j.join();
                 System.out.println(j.getName()+j.isAlive());

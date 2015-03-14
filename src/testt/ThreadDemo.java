@@ -6,9 +6,6 @@
 
 package testt;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  *
  * @author Zhizhou
@@ -31,16 +28,7 @@ class ThreadDemo extends Thread {
 	}catch (InterruptedException e){
 	    System.out.println("Oops...");
 	}
-        /*for(int i = 1; i<=10; i++){
-            synchronized(PD){
-                try {
-                    wait();
-                } catch (InterruptedException ex) {
-                    //Logger.getLogger(ThreadDemo.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                System.out.println(threadName + " is running at "+i);
-            }
-        }*/
+        
     }
     
     @Override
