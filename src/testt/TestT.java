@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import static java.lang.System.exit;
+import static java.lang.Thread.sleep;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,16 +38,17 @@ public class TestT {
         ArrayList<ThreadDemo> ths = new ArrayList<>();
         
         for(int i = 1; i <= nThreads; i++){
-            ThreadDemo t = new ThreadDemo("Thread-"+i, PD);
+            ThreadDemo t = new ThreadDemo("Thread--"+i, PD);
             ths.add(t);
             t.start();
-            
+            //System.out.println(t.isAlive());
         }
 	// wait for threads to end
 	try {
+            sleep(3000);
             for(ThreadDemo j : ths){
                 j.join();
-                System.out.println(j.getName()+" ended");
+                System.out.println(j.getName()+j.isAlive());
             }
         } catch( Exception e) {
 	    System.out.println("Interrupted");
