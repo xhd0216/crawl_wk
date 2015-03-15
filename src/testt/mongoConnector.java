@@ -17,6 +17,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
+import com.mongodb.WriteResult;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -24,6 +25,18 @@ public class mongoConnector {
     private  MongoClient client;
     private  DB db;
     private  DBCollection coll;
+    private WriteConcern wc = WriteConcern.ACKNOWLEDGED;
+    @Deprecated
+    public String urlToID(String u){
+        BasicDBObject query = new BasicDBObject("url", u);
+        DBObject o = coll.findOne(query);
+        if(o == null){
+            return "";
+        }
+        else{
+            return (String)o.get("_id");
+        }
+    }
     public mongoConnector() throws UnknownHostException {
         /*
         *  this section won't cause any exception yet, exception will be thrown
@@ -47,11 +60,19 @@ public class mongoConnector {
         /* the close method will also cause exception*/
         client.close();
     }
+    @Deprecated
     public void writeToDB(String t, String u) throws UnknownHostException{
         BasicDBObject doc = new BasicDBObject("title", t);
         doc.append("url", u);
         coll.insert(doc);
     }
+    public void insertToCollection(DBCompatible dbc){
+        if(dbc == null){
+            return;
+        }
+        WriteResult res = coll.insert(dbc.toDBO(), wc);
+    }
+    @Deprecated
     public boolean writeToDB(PageNode p){
         try{
             BasicDBObject doc = new BasicDBObject("url", p.getURL());

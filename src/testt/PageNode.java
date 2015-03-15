@@ -1,5 +1,7 @@
 package testt;
+import com.mongodb.DBObject;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedList;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -18,12 +20,14 @@ import org.jsoup.select.Elements;
 
 
 
-public class PageNode{
-    String UniqueID;
-    String title;
-    LinkedList<PageNode> outgoings; 
-    LinkedList<PageNode> incomings;
+public abstract class PageNode{
+    static int serial = 0;
+    String UniqueID;//url
+    String title;//title of the page
+    HashSet<PageNode> outgoings; 
+    HashSet<PageNode> incomings;
     Boolean traversed;
+    int ID;
     public String getURL(){
         return UniqueID;
     }
@@ -33,25 +37,22 @@ public class PageNode{
     public synchronized boolean isChecked(){
         return traversed;
     }
-    public LinkedList<PageNode> getOut(){
-        return outgoings;
+    public PageNode [] getOut(){
+        return (PageNode [])outgoings.toArray();
     }
-    public LinkedList<PageNode> getIn(){
-        return incomings;
-    }
-    @Deprecated
-    PageNode(String u, PageNode p){
-        outgoings  = new LinkedList();
-        incomings  = new LinkedList();
-        UniqueID = u;
-        traversed = false;
-        incomings.add(p);
+    public PageNode [] getIn(){
+        return (PageNode [])incomings.toArray();
     }
     PageNode(String u){
-        outgoings  = new LinkedList();
-        incomings  = new LinkedList();
+        outgoings  = new HashSet();
+        incomings  = new HashSet();
         UniqueID = u;
         traversed = false;
+        ID = serial;
+        serial++;
+    }
+    int getID(){
+        return ID;
     }
     public void insert(PageNode p, Boolean isOut){
         if(isOut)
@@ -77,7 +78,6 @@ public class PageNode{
             String cl = l.attr("class");
             if (!(!cl.equals("mw-redirect"))) {
                 String ref = l.attr("href");
-                //String outlink = l.attr("title");
                 if(ref.charAt(0) == '/'){
                     ref = BaseUrl + ref;
                 }
@@ -87,5 +87,7 @@ public class PageNode{
         traversed = true;
         return result;
     }
+
+
     
 }

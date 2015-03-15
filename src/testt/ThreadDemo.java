@@ -6,6 +6,10 @@
 
 package testt;
 
+import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Zhizhou
@@ -27,7 +31,10 @@ class ThreadDemo extends Thread {
             
 	}catch (InterruptedException e){
 	    System.out.println("Oops...");
-	}
+	} catch (UnknownHostException ex) {
+            System.out.println("db connection fails");
+            //Logger.getLogger(ThreadDemo.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
     }
     

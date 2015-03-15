@@ -20,11 +20,11 @@ import java.util.Queue;
 
 //controllor
 class testCode{
-    private final Queue<PageNode> q; //= new LinkedList<PageNode>();
-    /* page title to pagenode map */
-    private final HashMap<String, PageNode> hm; //= new HashMap<> ();
-    /* pagenode to its _id in database */
-    private final HashMap<PageNode, String> ptd;// = new HashMap<> ();
+    private final Queue<DBNode> q; //= new LinkedList<PageNode>();
+    /* page url to pagenode map */
+    private final HashMap<String, DBNode> hm; //= new HashMap<> ();
+    /* page url to its _id in database */
+    //private final HashMap<String, String> ptd;// = new HashMap<> ();
     private Integer count = 0;
     //private PrintWriter writer;
     private final String BaseUrl;
@@ -32,7 +32,7 @@ class testCode{
     private mongoConnector conn;
     private int depth;
 
-    testCode(String u, String fileName) throws UnsupportedEncodingException, UnknownHostException{
+    testCode(String u, String fileName) throws UnsupportedEncodingException{
         //set to false when the queue is empty and no more new links is coming
         shouldRun = true;
         //root url
@@ -41,50 +41,51 @@ class testCode{
         String url = u + "/wiki/" + fileName;
         q = new LinkedList<>();
         hm = new HashMap<> ();
-        ptd = new HashMap<> ();
-        PageNode pn = new PageNode(url);
+        //ptd = new HashMap<> ();
+        DBNode pn = new DBNode(url);
         q.add(pn);
         hm.put(url, pn);
-        /*try{
-            writer = new PrintWriter(fileName+".txt", "UTF-8");
-            writer.println(url);
-        }
-        catch (FileNotFoundException e1){
-            System.out.println("file open error");
-        }*/
         try{
             conn = new mongoConnector();
-            
         }
         catch (UnknownHostException e2){
             System.out.println("can not connect to database");
         }
     }
     /* returns true if new nodes added to queue*/
-    private boolean processURL(PageNode p){
+    private boolean processURL(DBNode p){
         Boolean result = false;
         /* returns true if there are new links added, otherwise, return false*/
         if(p == null || p.isChecked()){
             return result;
         }
         LinkedList<String> ss = p.traverse(BaseUrl);
+        
         for(String s : ss){
+            DBNode n;
             synchronized(this){
                 if(!hm.containsKey(s)){
-                    PageNode n = new PageNode(s);
+                    n = new DBNode(s);
+                    //n.setID(count);
                     hm.put(s, n);
                     q.add(n);
                     result = true;
                 }
-                hm.get(s).insert(p, false);
+                else n = hm.get(s);
             }
-            p.insert(hm.get(s), true);
+            /* update graph */
+            n.insert(p, false);
+            p.insert(n, true);
+            
+            /* update graph in database */
+            /* add outbound link to existing node p */            
         }
+        conn.insertToCollection(p);
         return result;
     }
-    public void calc(String t) throws InterruptedException{
+    public void calc(String t) throws InterruptedException, UnknownHostException{
 	while(count < 200){
-            PageNode temp = null;
+            DBNode temp = null;
 	    synchronized (this){
                 while(q.isEmpty()){
                     if(!shouldRun){
@@ -97,29 +98,28 @@ class testCode{
                 }
 		temp = q.remove();
 		count++;
+                //temp.setID(count);
 		notify();
 	    }
             if(temp != null){
                 System.out.println("count "+count + " " + t+ " works on " + temp.getURL());
+                //temp.setID(count);
                 boolean b = processURL(temp);
-                if(b) conn.writeToDB(temp);
-                else
+                //conn.insertToCollection(temp);
+                if(!b){
                     synchronized(this){
                         if(q.isEmpty()){
                             shouldRun = false;
                             System.out.println("no more pages in the pool");
                             notify();
                             break;
+                        }
                     }
                 }
             }
 	}
-        //close();
-        //System.out.println("Thread really ends");
-        //return;
     }
     public void close(){
-        
         try{
             //writer.close();
             //conn.close();
@@ -128,7 +128,5 @@ class testCode{
         catch(Exception e){
             //do nothing;
         }
-        
     }
-
 }
