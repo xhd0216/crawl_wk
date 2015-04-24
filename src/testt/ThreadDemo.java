@@ -7,8 +7,6 @@
 package testt;
 
 import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -16,7 +14,7 @@ import java.util.logging.Logger;
  */
 class ThreadDemo extends Thread {
     private Thread t;
-    private String threadName;
+    private final String threadName;
     testCode  PD;
     
     ThreadDemo( String name,  testCode pd){

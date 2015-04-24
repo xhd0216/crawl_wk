@@ -1,5 +1,4 @@
 package testt;
-import com.mongodb.DBObject;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -22,17 +21,26 @@ import org.jsoup.select.Elements;
 
 public abstract class PageNode{
     static int serial = 0;
-    String UniqueID;//url
+    final String UniqueID;//url
     String title;//title of the page
-    HashSet<PageNode> outgoings; 
-    HashSet<PageNode> incomings;
+    final HashSet<PageNode> outgoings; 
+    final HashSet<PageNode> incomings;
     Boolean traversed;
-    int ID;
+    final int ID;
+    public Boolean isOutLink(PageNode n){
+        return this.outgoings.contains(n);
+    }
+    public Boolean isInLink(PageNode n){
+        return this.incomings.contains(n);
+    }
     public String getURL(){
         return UniqueID;
     }
     public String getTitle(){
         return title;
+    }
+    public synchronized void setChecked(){
+        traversed = true;
     }
     public synchronized boolean isChecked(){
         return traversed;
@@ -51,7 +59,7 @@ public abstract class PageNode{
         ID = serial;
         serial++;
     }
-    int getID(){
+    public int getID(){
         return ID;
     }
     public void insert(PageNode p, Boolean isOut){
@@ -61,6 +69,7 @@ public abstract class PageNode{
             incomings.add(p);
     }
     public LinkedList<String> traverse(String BaseUrl){
+        if(traversed) return null;
         Document doc;
         Elements links;
         LinkedList<String> result = new LinkedList();
@@ -72,8 +81,7 @@ public abstract class PageNode{
             System.out.println("can not open page");
             return result;
         }
-        title = doc.title();
-        title = title.split(" - ")[0];
+        title = doc.title().split(" - ")[0];
         links.stream().forEach((l) -> {
             String cl = l.attr("class");
             if (!(!cl.equals("mw-redirect"))) {
@@ -84,7 +92,8 @@ public abstract class PageNode{
                 result.add(ref);
             }
         });
-        traversed = true;
+        /* make it true util it it written to database */
+        //traversed = true;
         return result;
     }
 

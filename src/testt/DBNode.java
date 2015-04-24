@@ -8,9 +8,7 @@ package testt;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
-import java.util.LinkedList;
 
 /**
  *
@@ -27,7 +25,7 @@ public class DBNode extends PageNode implements DBCompatible{
     @Override
     public DBObject toDBO() {
         if(doc != null) return doc;
-        if(!this.isChecked()) return null;
+        //if(!this.isChecked()) return null;
         doc = new BasicDBObject();
         doc.append("url", this.getURL());
         doc.append("title", this.getTitle());

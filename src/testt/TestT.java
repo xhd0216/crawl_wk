@@ -5,21 +5,10 @@
  */
 
 package testt;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import static java.lang.System.exit;
 import static java.lang.Thread.sleep;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 /**
  *
  * @author Zhizhou
@@ -28,12 +17,14 @@ public class TestT {
 
     /**
      * @param args the command line arguments
+     * @throws java.io.UnsupportedEncodingException
+     * @throws java.net.UnknownHostException
      */
     public static void main(String args[]) throws UnsupportedEncodingException, UnknownHostException {
         String url = "http://en.wikipedia.org";
         String fileName = "Ohio";
         testCode PD = new testCode(url, fileName);
-        boolean allFinished = false;
+        //boolean allFinished = false;
 	int nThreads = 4;
         ArrayList<ThreadDemo> ths = new ArrayList<>();
         
@@ -50,7 +41,7 @@ public class TestT {
                 j.join();
                 System.out.println(j.getName()+j.isAlive());
             }
-        } catch( Exception e) {
+        } catch( InterruptedException e) {
 	    System.out.println("Interrupted");
 	}
         //PD.close();

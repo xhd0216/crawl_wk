@@ -30,7 +30,7 @@ class testCode{
     private final String BaseUrl;
     private boolean shouldRun;
     private mongoConnector conn;
-    private int depth;
+    private final int depth;
 
     testCode(String u, String fileName) throws UnsupportedEncodingException{
         //set to false when the queue is empty and no more new links is coming
@@ -74,13 +74,26 @@ class testCode{
                 else n = hm.get(s);
             }
             /* update graph */
-            n.insert(p, false);
-            p.insert(n, true);
+            if(!p.isOutLink(n)){
+                p.insert(n, true);
+                /* update database */
+                //conn.pushToArray("ID", p.getID(), "out", n.getID());
+            }
+            if(!n.isInLink(p)){
+                n.insert(p, false);
+                if(n.isChecked()){
+                    conn.pushToArray("ID", n.getID(), "in", p.getID());
+                }
+            }
             
             /* update graph in database */
             /* add outbound link to existing node p */            
         }
-        conn.insertToCollection(p);
+        if(!p.isChecked()){
+            conn.insertToCollection(p);
+            p.setChecked();
+            
+        }
         return result;
     }
     public void calc(String t) throws InterruptedException, UnknownHostException{

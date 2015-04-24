@@ -22,10 +22,10 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Scanner;
 public class mongoConnector {
-    private  MongoClient client;
-    private  DB db;
-    private  DBCollection coll;
-    private WriteConcern wc = WriteConcern.ACKNOWLEDGED;
+    private final  MongoClient client;
+    private final  DB db;
+    private final  DBCollection coll;
+    private final WriteConcern wc = WriteConcern.ACKNOWLEDGED;
     @Deprecated
     public String urlToID(String u){
         BasicDBObject query = new BasicDBObject("url", u);
@@ -66,11 +66,23 @@ public class mongoConnector {
         doc.append("url", u);
         coll.insert(doc);
     }
+    public boolean pushToArray(String key, Object val,  String field, Object o){
+        WriteResult res;
+        try{
+            BasicDBObject query = new BasicDBObject(key, val);
+            BasicDBObject push = new BasicDBObject("$push", new BasicDBObject(field, o));
+            res = coll.update(query, push, false, true, wc);
+        }catch(Exception e){
+            return false;
+        }
+        return res.getN() > 0;
+    }
     public void insertToCollection(DBCompatible dbc){
         if(dbc == null){
             return;
         }
         WriteResult res = coll.insert(dbc.toDBO(), wc);
+        //return res.getN() > 0;
     }
     @Deprecated
     public boolean writeToDB(PageNode p){
