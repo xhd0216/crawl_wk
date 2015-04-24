@@ -74,7 +74,7 @@ public class mongoConnector {
             res = coll.update(query, push, false, true, wc);
         }catch(Exception e){
             return false;
-        }
+        } 
         return res.getN() > 0;
     }
     public void insertToCollection(DBCompatible dbc){
